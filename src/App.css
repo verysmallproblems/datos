@@ -205,3 +205,142 @@
   color: white;
   transform: rotate(-45deg);
 }
+
+.swipeable-card {
+  position: absolute;
+  inset: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  user-select: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.swipeable-card h2 {
+  color: white;
+  font-size: 1.8rem;
+  margin: 0 0 30px 0;
+  font-weight: 300;
+}
+
+.card-stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.card-hint {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  margin: 0;
+  position: absolute;
+  bottom: 30px;
+}
+
+.card-message {
+  color: white;
+  font-size: 1.1rem;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0 10px;
+}
+
+.card-timeframe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 0 15px;
+}
+
+.card-emoji {
+  font-size: 3rem;
+}
+
+.card-time {
+  color: white;
+  font-size: 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.card-time strong {
+  font-weight: 700;
+}
+
+.card-action {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+.card-final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 0 15px;
+}
+
+.card-final-intro {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 0;
+}
+
+.card-final-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.years-lost {
+  color: white;
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.years-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+  margin-top: 5px;
+}
+
+.card-final-message {
+  color: white;
+  font-size: 1.2rem;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}

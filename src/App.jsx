@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Motion, spring } from 'react-motion'
 import './App.css'
 
@@ -6,16 +6,131 @@ function App() {
   const [activeApp, setActiveApp] = useState(null)
   const [glowIntensity, setGlowIntensity] = useState(0)
   const [inputValue, setInputValue] = useState('')
-  const [sentMessage, setSentMessage] = useState(null)
+  const [ageAnswer, setAgeAnswer] = useState(null)
+  const [hoursAnswer, setHoursAnswer] = useState(null)
   const [showFollowUp, setShowFollowUp] = useState(false)
+  const [showCard, setShowCard] = useState(false)
+  const [currentCardIndex, setCurrentCardIndex] = useState(0)
 
   const app = { id: 1, name: 'Tu Vida', color: '#34C759' }
 
+  const scenarios = [
+    {
+      hoursSavedPerDay: 1,
+      timeframes: [
+        { label: '1 semana', hoursGained: 7, message: 'Suficiente para empezar un nuevo idioma.' },
+        { label: '1 mes', hoursGained: 30, message: 'Suficiente para aprender una canción desde cero.' },
+        { label: '1 año', hoursGained: 365, message: 'Suficiente para conversar con fluidez y sentir el progreso.' },
+        { label: '5 años', hoursGained: 1825, message: 'Suficiente para reinventar una parte entera de tu vida.' },
+      ],
+    },
+    {
+      hoursSavedPerDay: 2,
+      timeframes: [
+        { label: '1 semana', hoursGained: 14, message: 'Suficiente para completar un sprint de idioma para principiantes.' },
+        { label: '1 mes', hoursGained: 60, message: 'Suficiente para aprender 2–3 canciones y grabar una.' },
+        { label: '1 año', hoursGained: 730, message: 'Suficiente para alcanzar verdadera confianza en un idioma.' },
+        { label: '5 años', hoursGained: 3650, message: 'Suficiente para construir nuevas habilidades y un portafolio de trabajo.' },
+      ],
+    },
+    {
+      hoursSavedPerDay: 3,
+      timeframes: [
+        { label: '1 semana', hoursGained: 21, message: 'Suficiente para sentir un progreso real en un idioma—rápido.' },
+        { label: '1 mes', hoursGained: 90, message: 'Suficiente para aprender varias canciones y tocar una para alguien.' },
+        { label: '1 año', hoursGained: 1095, message: 'Suficiente para pensar en otro idioma de forma natural.' },
+        { label: '5 años', hoursGained: 5475, message: 'Suficiente para dominar un oficio y construir una segunda vida.' },
+      ],
+    },
+    {
+      hoursSavedPerDay: 4,
+      timeframes: [
+        { label: '1 semana', hoursGained: 28, message: 'Suficiente para crear un hábito que cambie tu identidad.' },
+        { label: '1 mes', hoursGained: 120, message: 'Suficiente para completar un curso completo de principiante en un idioma.' },
+        { label: '1 año', hoursGained: 1460, message: 'Suficiente para vivir cómodamente en otro idioma.' },
+        { label: '5 años', hoursGained: 7300, message: 'Suficiente para convertirte en alguien que logra grandes cosas.' },
+      ],
+    },
+    {
+      hoursSavedPerDay: 5,
+      timeframes: [
+        { label: '1 semana', hoursGained: 35, message: 'Suficiente para crear un proyecto real—no solo planearlo.' },
+        { label: '1 mes', hoursGained: 150, message: 'Suficiente para construir un portafolio del que estés orgulloso.' },
+        { label: '1 año', hoursGained: 1825, message: 'Suficiente para cambiar la trayectoria de tu vida—habilidades, amigos, confianza.' },
+        { label: '5 años', hoursGained: 9125, message: 'Suficiente para reinventar tu mundo entero.' },
+      ],
+    },
+  ]
+
+  const getScenario = () => {
+    const hours = Math.min(5, Math.max(1, Math.round(parseFloat(hoursAnswer) || 1)))
+    return scenarios.find((s) => s.hoursSavedPerDay === hours) || scenarios[0]
+  }
+
+  const gradients = [
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  ]
+
+  const timeLabels = ['semana', 'mes', 'año', '5 años']
+  const timeEmojis = ['📅', '⏳', '👴', '🌟']
+
+  const getCards = () => {
+    const scenario = getScenario()
+    const hours = parseFloat(hoursAnswer) || 0
+    const age = parseFloat(ageAnswer) || 0
+    const yearsRemaining = Math.max(0, 80 - age)
+    const totalHoursOnPhone = yearsRemaining * 365 * hours
+    const yearsLost = (totalHoursOnPhone / (24 * 365)).toFixed(1)
+
+    return [
+      {
+        id: 1,
+        title: 'Tu Vida',
+        gradient: gradients[0],
+        content: 'stats',
+      },
+      ...scenario.timeframes.map((tf, index) => ({
+        id: index + 2,
+        title: tf.label,
+        gradient: gradients[index + 1] || gradients[index % gradients.length],
+        content: 'timeframe',
+        hoursGained: tf.hoursGained,
+        message: tf.message,
+        timeLabel: timeLabels[index],
+        emoji: timeEmojis[index],
+      })),
+      {
+        id: 7,
+        title: 'Tu Futuro',
+        gradient: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+        content: 'final',
+        yearsRemaining,
+        yearsLost,
+      },
+    ]
+  }
+
+  const cards = getCards()
+
+  const handleNextCard = () => {
+    setCurrentCardIndex((prev) => prev + 1)
+  }
+
   const handleSend = () => {
-    if (inputValue.trim() && !sentMessage) {
-      setSentMessage(inputValue.trim())
-      setInputValue('')
-      setTimeout(() => setShowFollowUp(true), 800)
+    if (inputValue.trim()) {
+      if (!ageAnswer) {
+        setAgeAnswer(inputValue.trim())
+        setInputValue('')
+        setTimeout(() => setShowFollowUp(true), 800)
+      } else if (!hoursAnswer) {
+        setHoursAnswer(inputValue.trim())
+        setInputValue('')
+        setTimeout(() => setShowCard(true), 800)
+      }
     }
   }
 
@@ -31,7 +146,15 @@ function App() {
       <div className="phone">
         <div className="phone-notch"></div>
         <div className="phone-screen">
-          {activeApp ? (
+          {showCard && currentCardIndex < cards.length ? (
+            <SwipeableCard
+              key={currentCardIndex}
+              card={cards[currentCardIndex]}
+              ageAnswer={ageAnswer}
+              hoursAnswer={hoursAnswer}
+              onDismiss={handleNextCard}
+            />
+          ) : activeApp ? (
             <Motion
               defaultStyle={{ opacity: 0, y: 20 }}
               style={{
@@ -57,7 +180,7 @@ function App() {
                     >
                       <p>¿Cuántos años tienes?</p>
                     </div>
-                    {sentMessage && (
+                    {ageAnswer && (
                       <>
                         <Motion
                           defaultStyle={{ scale: 0.3, opacity: 0 }}
@@ -74,7 +197,7 @@ function App() {
                                 opacity: style.opacity,
                               }}
                             >
-                              <p>{sentMessage}</p>
+                              <p>{ageAnswer}</p>
                             </div>
                           )}
                         </Motion>
@@ -96,6 +219,28 @@ function App() {
                                 }}
                               >
                                 <p>¿Y cuántas horas estás por tu móvil por día? (Sea honesto, todos somos amigos aquí.)</p>
+                              </div>
+                            )}
+                          </Motion>
+                        )}
+                        {hoursAnswer && (
+                          <Motion
+                            defaultStyle={{ scale: 0.3, opacity: 0 }}
+                            style={{
+                              scale: spring(1, { stiffness: 400, damping: 10 }),
+                              opacity: spring(1),
+                            }}
+                          >
+                            {(style) => (
+                              <div
+                                className="message sent"
+                                style={{
+                                  transform: `scale(${style.scale})`,
+                                  opacity: style.opacity,
+                                  marginTop: '12px',
+                                }}
+                              >
+                                <p>{hoursAnswer}</p>
                               </div>
                             )}
                           </Motion>
@@ -149,6 +294,174 @@ function App() {
         </div>
       </div>
     </div>
+  )
+}
+
+function SwipeableCard({ card, ageAnswer, hoursAnswer, onDismiss }) {
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 })
+  const [dismissed, setDismissed] = useState(false)
+  const [dismissDirection, setDismissDirection] = useState(null)
+  const dragStartTime = useRef(0)
+
+  const hours = parseFloat(hoursAnswer) || 0
+  const age = parseFloat(ageAnswer) || 0
+  const daysPerYear = Math.round((hours * 365) / 24)
+  const lifeExpectancy = 80
+  const yearsOnPhone = Math.round(((lifeExpectancy - age) * hours) / 24)
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true)
+    setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y })
+    dragStartTime.current = Date.now()
+  }
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return
+    setPosition({
+      x: e.clientX - startPos.x,
+      y: e.clientY - startPos.y,
+    })
+  }
+
+  const handleMouseUp = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const dragDuration = Date.now() - dragStartTime.current
+    const distance = Math.sqrt(position.x ** 2 + position.y ** 2)
+
+    // Quick click - slide away vertically
+    if (dragDuration < 200 && distance < 10) {
+      setDismissDirection('up')
+      setDismissed(true)
+      setTimeout(onDismiss, 300)
+      return
+    }
+
+    // Flick away if moved far enough
+    if (Math.abs(position.x) > 100 || Math.abs(position.y) > 150) {
+      setDismissDirection(position.y < 0 ? 'up' : position.x > 0 ? 'right' : 'left')
+      setDismissed(true)
+      setTimeout(onDismiss, 300)
+    } else {
+      setPosition({ x: 0, y: 0 })
+    }
+  }
+
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0]
+    setIsDragging(true)
+    setStartPos({ x: touch.clientX - position.x, y: touch.clientY - position.y })
+    dragStartTime.current = Date.now()
+  }
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return
+    const touch = e.touches[0]
+    setPosition({
+      x: touch.clientX - startPos.x,
+      y: touch.clientY - startPos.y,
+    })
+  }
+
+  const handleTouchEnd = handleMouseUp
+
+  const getDismissTarget = () => {
+    switch (dismissDirection) {
+      case 'up': return { x: 0, y: -800 }
+      case 'right': return { x: 500, y: position.y }
+      case 'left': return { x: -500, y: position.y }
+      default: return { x: 0, y: -800 }
+    }
+  }
+
+  const target = dismissed ? getDismissTarget() : position
+
+  const formatMessage = (msg) => {
+    return msg
+      .replace('{hours}', daysPerYear)
+      .replace('{years}', yearsOnPhone)
+  }
+
+  const renderCardContent = () => {
+    switch (card.content) {
+      case 'stats':
+        return (
+          <div className="card-stats">
+            <div className="stat">
+              <span className="stat-value">{ageAnswer}</span>
+              <span className="stat-label">años</span>
+            </div>
+            <div className="stat">
+              <span className="stat-value">{hoursAnswer}</span>
+              <span className="stat-label">horas/día</span>
+            </div>
+          </div>
+        )
+      case 'timeframe':
+        return (
+          <div className="card-timeframe">
+            <span className="card-emoji">{card.emoji}</span>
+            <p className="card-time">
+              {hoursAnswer} horas al día, eso es <strong>{card.hoursGained} horas por {card.timeLabel}</strong>
+            </p>
+            <p className="card-action">{card.message}</p>
+          </div>
+        )
+      case 'final':
+        return (
+          <div className="card-final">
+            <span className="card-emoji">💀</span>
+            <p className="card-final-intro">Si vives hasta los 80 años, te quedan {card.yearsRemaining} años.</p>
+            <p className="card-final-stat">
+              <span className="years-lost">{card.yearsLost}</span>
+              <span className="years-label">años</span>
+            </p>
+            <p className="card-final-message">Es el tiempo que perderás mirando tu móvil si no cambias este hábito.</p>
+          </div>
+        )
+      default:
+        return (
+          <p className="card-message">{formatMessage(card.message)}</p>
+        )
+    }
+  }
+
+  return (
+    <Motion
+      defaultStyle={{ x: 0, y: 0, scale: 0.8, opacity: 0 }}
+      style={{
+        x: isDragging ? position.x : spring(target.x, { stiffness: 300, damping: 25 }),
+        y: isDragging ? position.y : spring(target.y, { stiffness: 300, damping: 25 }),
+        scale: spring(dismissed ? 0.8 : 1, { stiffness: 300, damping: 20 }),
+        opacity: spring(dismissed ? 0 : 1),
+      }}
+    >
+      {({ x, y, scale, opacity }) => (
+        <div
+          className="swipeable-card"
+          style={{
+            transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${x * 0.05}deg)`,
+            opacity,
+            cursor: isDragging ? 'grabbing' : 'grab',
+            background: card.gradient,
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {card.content !== 'timeframe' && <h2>{card.title}</h2>}
+          {renderCardContent()}
+          <p className="card-hint">Toca o desliza para continuar</p>
+        </div>
+      )}
+    </Motion>
   )
 }
 
